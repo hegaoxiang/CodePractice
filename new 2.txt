@@ -1,0 +1,141 @@
+#include <iostream>
+#include <stdio.h>
+#include<cstring>
+#include <queue>
+using namespace std;
+
+typedef struct Node
+{
+    char data;
+    struct Node* lChild;
+    struct Node* rChild;
+}TreeNode;
+
+class BiTree
+{
+private:
+    int idx = -1;
+public:
+    TreeNode* PreBuildTree(char* s)
+    {
+        idx ++;
+        TreeNode* root = new TreeNode();
+        root->data = s[idx];
+
+        if (s[idx] == '#')
+        {
+            root = NULL;
+            return root;
+        }
+
+        root->lChild = PreBuildTree(s);
+        root->rChild = PreBuildTree(s);
+    }
+     void InTraversal(TreeNode* root)
+     {
+         if (root == NULL)
+            return ;
+        
+         InTraversal(root->lChild);
+         cout << root->data << endl;
+         InTraversal(root->rChild);
+
+     }
+    void LevelTraversal(TreeNode* root)
+    {
+
+    }
+
+    TreeNode* BuildTreeByPreAndIn(char* pre,int preStart,char* in,int inStart,int section)
+    {
+        if (!pre || !in ||!section)
+            return NULL;
+        TreeNode* root = new TreeNode();
+        int rootOffest = 0;
+        for (int i = inStart;i < strlen(in);i ++)
+        {
+            if (pre[preStart] == in[i])
+                break;
+            rootOffest ++;
+        }
+        if (rootOffest >= 0)//left tree.
+        {
+
+            root->lChild = BuildTreeByPreAndIn(pre,preStart + 1,in,inStart,rootOffest);
+        }
+        if (rootOffest < section - 1)
+        {
+            root->rChild = BuildTreeByPreAndIn(pre,preStart + 1 + rootOffest,in,inStart + 1 + rootOffest,section - 1 - rootOffest);
+        }
+        root->data = pre[preStart];
+    }
+
+    bool IsComplete(TreeNode *root)
+    {
+        bool startJudge = false;
+        queue<TreeNode*> que;
+        if (!root)
+            return false;
+        que.push(root);
+        while (1)
+        {
+            TreeNode* tempTreeNode = new TreeNode();
+            tempTreeNode = que.front();
+            que.pop();
+            //cout << tempTreeNode->data << endl;
+            if (startJudge) //start to judge the rest leaves is single or not.
+            {
+                //cout << "*\n";
+                if (!tempTreeNode->rChild&&!tempTreeNode->lChild)
+                {
+                    if (!que.empty())
+                        que.pop();
+                    else // break the loop,and the answer is right
+                        return true;
+                }
+                else
+                    return false;
+            }
+            else
+            {
+                if (tempTreeNode->lChild&&tempTreeNode->rChild)
+                {
+                    que.push(tempTreeNode->lChild);
+                    que.push(tempTreeNode->rChild);
+                }
+                else
+                {
+                    if (!tempTreeNode->lChild&&tempTreeNode->rChild)//only have rChild.
+                        return false;
+                    else
+                    {
+                        if (tempTreeNode->lChild)//only have lChild.
+                        {
+                            startJudge = true;
+                            que.push(tempTreeNode->lChild);
+                        }
+                        else  // no child.
+                            startJudge = true;
+                    }
+                }
+            }
+        }
+
+    }
+
+};
+
+int main ()
+{
+    BiTree* bi = new BiTree();
+    //char *s = "abd##q##ce##f##";
+
+    //TreeNode* root = bi->PreBuildTree(s);
+    //bi->InTraversal(root);
+    //cout << bi->IsComplete(root)<<endl;
+    char* pre = "abec";
+    char* in = "beac";
+    TreeNode* root = bi->BuildTreeByPreAndIn(pre,0,in,0,strlen(pre));
+    bi->InTraversal(root);
+    return 0;
+}
