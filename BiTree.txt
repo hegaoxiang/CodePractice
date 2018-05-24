@@ -7,8 +7,12 @@ using namespace std;
 typedef struct Node
 {
     char data;
+
+    int frequency;
+
     struct Node* lChild;
     struct Node* rChild;
+    struct Node* father;
 }TreeNode;
 
 class BiTree
@@ -31,16 +35,21 @@ public:
         root->lChild = PreBuildTree(s);
         root->rChild = PreBuildTree(s);
     }
-     void InTraversal(TreeNode* root)
-     {
-         if (root == NULL)
+    void InTraversal(TreeNode* root)
+    {
+        if (root == NULL)
+        {
+            cout << "*";
             return ;
-        
-         InTraversal(root->lChild);
-         cout << root->data << endl;
-         InTraversal(root->rChild);
 
-     }
+        }
+
+        cout << root->frequency << endl;
+        InTraversal(root->lChild);
+
+        InTraversal(root->rChild);
+
+    }
     void LevelTraversal(TreeNode* root)
     {
 
@@ -123,6 +132,59 @@ public:
 
     }
 
+    TreeNode* BuildHuffman(char* ch,int e[])
+    {
+        TreeNode* nodeArray[100];
+        for (int i = 0;i < strlen(ch);i ++) // init the nodeArray.
+        {
+            nodeArray[i] = new TreeNode();
+
+            nodeArray[i]->data = ch[i];
+            nodeArray[i]->father = NULL;
+            nodeArray[i]->frequency = e[i];
+            nodeArray[i]->lChild = NULL;
+            nodeArray[i]->rChild = NULL;
+        }
+
+        int time = strlen(ch) - 1;
+        int maxIdx = time;
+        while (time --)
+        {
+            TreeNode* node = new TreeNode();
+                node->father = NULL;
+                node->frequency = 0;
+                node->lChild = NULL;
+                node->rChild = NULL;
+            for (int i = 0;i < 2;i ++)// find two min.
+            {
+                int minIdx = maxIdx;
+                for (int j = 0;j < maxIdx;j ++)
+                {
+                    if (!nodeArray[j]->father&&nodeArray[minIdx]->frequency >= nodeArray[j]->frequency)
+                    {
+                        minIdx = j;
+                    }
+                }
+                cout << "minIdx" << minIdx<< endl;
+                node->frequency += nodeArray[minIdx]->frequency;
+
+                if (i == 0)
+                {
+                    node->lChild = nodeArray[minIdx];
+                    nodeArray[minIdx]->father = node;
+                }
+                else
+                {
+                    node->rChild = nodeArray[minIdx];
+                    nodeArray[minIdx]->father = node;
+                }
+            }
+            nodeArray[++ maxIdx] = node;
+            cout << maxIdx<<"@" << node->frequency<< endl;
+
+        }
+        return nodeArray[maxIdx];
+    }
 };
 
 int main ()
@@ -133,9 +195,17 @@ int main ()
     //TreeNode* root = bi->PreBuildTree(s);
     //bi->InTraversal(root);
     //cout << bi->IsComplete(root)<<endl;
-    char* pre = "abec";
-    char* in = "beac";
-    TreeNode* root = bi->BuildTreeByPreAndIn(pre,0,in,0,strlen(pre));
+    //char* pre = "abec";
+    //char* in = "beac";
+    //TreeNode* root = bi->BuildTreeByPreAndIn(pre,0,in,0,strlen(pre));
+    //bi->InTraversal(root);
+
+    char *s = "abcdefg";
+    int p[] = {1,2,3,4,5,6,7};
+    TreeNode* root = bi->BuildHuffman(s,p);
+
     bi->InTraversal(root);
+
+
     return 0;
 }
